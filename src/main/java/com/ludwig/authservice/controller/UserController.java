@@ -19,9 +19,12 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user){
-        if(userService.findByUsername(user.getUsername()).isPresent()){
+        if(userService.findByUsername(user.getUsername()).isPresent())
             return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);
-        }
+
+        if(userService.findByEmail(user.getEmail()).isPresent())
+            return new ResponseEntity<>("Email already exits", HttpStatus.BAD_REQUEST);
+
         userService.registerNewUser(user);
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
     }

@@ -20,6 +20,10 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    public Optional<User> findByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
     public User registerNewUser(User user) {
         user.setRole("USER");
         user.setPassword(passwordEncoder.encode(user.getPassword()));

@@ -9,10 +9,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.List;
 
+@Service
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired

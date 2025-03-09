@@ -1,4 +1,4 @@
-package com.ludwig.authservice.controller.config;
+package com.ludwig.authservice.config;
 
 import com.ludwig.authservice.filter.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;

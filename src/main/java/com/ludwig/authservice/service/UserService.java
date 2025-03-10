@@ -35,4 +35,15 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
+    public boolean updateUsername(Long userId, String newUsername){
+        Optional<User> userOptional = userRepository.findById(userId);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            user.setUsername(newUsername);
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
 }

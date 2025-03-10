@@ -3,7 +3,6 @@ package com.ludwig.authservice.controller;
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,6 +49,30 @@ public class UserController {
 
         String token = jwtUtil.generateToken(foundUser.get().getId());
         return new ResponseEntity<>(token, HttpStatus.OK);
+    }
+
+    @PutMapping("/update/username")
+    public ResponseEntity<String> updateUsername(@RequestHeader("Authorization") String authHeader,
+                                                 @RequestBody Map<String, String> requestBody) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);  // Extract user ID from token
+        String newUsername = requestBody.get("newUsername");
+
+        if (newUsername == null || newUsername.trim().isEmpty())
+            return new ResponseEntity<>("Username can not be empty", HttpStatus.BAD_REQUEST);
+
+        if (userService.findByUsername(newUsername).isPresent())
+            return new ResponseEntity<>("Username already taken", HttpStatus.BAD_REQUEST);
+
+        boolean isUpdated = userService.updateUsername(userId, newUsername);
+        if (!isUpdated)
+            return new ResponseEntity<>("Failed to update username", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>("Username updated successfully", HttpStatus.OK);
     }
 }
 

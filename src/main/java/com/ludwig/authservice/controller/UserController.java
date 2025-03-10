@@ -41,10 +41,10 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User user){
-        Optional<User> foundUser = userService.findByUsername(user.getUsername());
+        Optional<User> foundUser =  userService.findByEmail(user.getEmail());
 
         if(foundUser.isEmpty())
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Email not found", HttpStatus.NOT_FOUND);
 
         if(!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword()))
             return new ResponseEntity<>("Invalid password", HttpStatus.UNAUTHORIZED);

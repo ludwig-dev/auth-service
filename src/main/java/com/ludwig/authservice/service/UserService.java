@@ -24,6 +24,10 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public Optional<User> findById(Long userId){
+        return userRepository.findById(userId);
+    }
+
     public User registerNewUser(User user) {
         user.setRole("USER");
         user.setPassword(passwordEncoder.encode(user.getPassword()));

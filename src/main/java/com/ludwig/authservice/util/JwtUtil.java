@@ -27,8 +27,8 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public Long extractUserId(String token) {
+        return Long.parseLong(extractClaim(token, Claims::getSubject));
     }
 
     public Date extractExpiration(String token) {
@@ -41,7 +41,6 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        // Use parserBuilder() instead of deprecated parser()
         return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
     }
 
@@ -49,9 +48,9 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(Long userId) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return createToken(claims, userId.toString());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
@@ -64,9 +63,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    public Boolean validateToken(String token, Long userId) {
+        final Long extractedUserId = extractUserId(token);  // Extract user ID from token
+        return (extractedUserId.equals(userId) && !isTokenExpired(token));
     }
-
 }

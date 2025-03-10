@@ -49,7 +49,7 @@ public class UserController {
         if(!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword()))
             return new ResponseEntity<>("Invalid password", HttpStatus.UNAUTHORIZED);
 
-        String token = jwtUtil.generateToken(foundUser.get().getUsername());
+        String token = jwtUtil.generateToken(foundUser.get().getId());
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 }

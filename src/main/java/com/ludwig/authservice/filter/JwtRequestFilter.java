@@ -1,6 +1,7 @@
 package com.ludwig.authservice.filter;
 
-import com.ludwig.authservice.service.CustomUserDetailsService;
+import com.ludwig.authservice.model.User;
+import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -22,7 +24,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private CustomUserDetailsService userDetailsService;
+    private UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -30,29 +32,31 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        String username = null;
+        Long userId = null;
         String jwt = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
-            username = jwtUtil.extractUsername(jwt);
+            userId = jwtUtil.extractUserId(jwt);
         }
 
-        // If username is valid and no authentication is currently set
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        // If userId is valid and no authentication is currently set
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);  // Fetch user details
+            User user = userService.findById(userId).orElse(null);
 
             // Validate the token
-            if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+            if (user != null && jwtUtil.validateToken(jwt, user.getId())) {
+                UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername(),
+                        user.getPassword(),
+                        List.of(() -> "ROLE_" + user.getRole()));
 
                 // Set authentication in the security context
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Set the authentication in the security context
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
         chain.doFilter(request, response);

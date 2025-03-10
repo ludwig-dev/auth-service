@@ -2,6 +2,7 @@ package com.ludwig.authservice.controller;
 
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.service.UserService;
+import com.ludwig.authservice.util.EmailValidator;
 import com.ludwig.authservice.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,10 @@ public class UserController {
 
         if (userService.findByEmail(user.getEmail()).isPresent())
             return new ResponseEntity<>("Email already exits", HttpStatus.BAD_REQUEST);
+
+        if(!EmailValidator.isValid(user.getEmail())){
+            return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
+        }
 
         userService.registerNewUser(user);
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);

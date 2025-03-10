@@ -1,7 +1,7 @@
 package com.ludwig.authservice.config;
 
 import com.ludwig.authservice.filter.JwtRequestFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ludwig.authservice.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,15 +16,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private final JwtUtil jwtUtil;
+
+    public SecurityConfig(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    public JwtRequestFilter jwtRequestFilter() {
+        return new JwtRequestFilter(jwtUtil);
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())  // Disable CSRF as we are using JWT
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "api/users/login").permitAll()  // Public access for login & registration
+                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // Public access for login & registration
                         .anyRequest().authenticated()  // All other requests require authentication
                 )
                 .sessionManagement(session -> session

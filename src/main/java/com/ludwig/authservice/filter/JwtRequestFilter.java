@@ -7,24 +7,30 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
 
-@Component
-public class JwtRequestFilter extends OncePerRequestFilter {
+public class JwtRequestFilter extends OncePerRequestFilter implements ApplicationContextAware {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+    private static ApplicationContext applicationContext;
 
-    private UserService userService;
+    public JwtRequestFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext context) {
+        applicationContext = context;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -43,15 +49,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // If userId is valid and no authentication is currently set
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
+            // Dynamically fetch UserService at runtime to prevent circular dependency
+            UserService userService = applicationContext.getBean(UserService.class);
             User user = userService.findById(userId).orElse(null);
 
-            // Validate the token
             if (user != null && jwtUtil.validateToken(jwt, user.getId())) {
-                UserDetails userDetails = new org.springframework.security.core.userdetails.User(user.getUsername(),
+                UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                        user.getUsername(),
                         user.getPassword(),
-                        List.of(() -> "ROLE_" + user.getRole()));
+                        List.of(() -> "ROLE_" + user.getRole())  // Assign roles
+                );
 
-                // Set authentication in the security context
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

@@ -2,7 +2,6 @@ package com.ludwig.authservice.service;
 
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +17,15 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> findByUsername(String username){
+    public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public Optional<User> findByEmail(String email){
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public Optional<User> findById(Long userId){
+    public Optional<User> findById(Long userId) {
         return userRepository.findById(userId);
     }
 
@@ -36,14 +35,25 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public boolean updateUsername(Long userId, String newUsername){
+    public boolean updateUsername(Long userId, String newUsername) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if(userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
             user.setUsername(newUsername);
             userRepository.save(user);
             return true;
         }
         return false;
+    }
+
+    public boolean updateEmail(Long userId, String newEmail) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty())
+            return false;
+
+        User user = userOptional.get();
+        user.setEmail(newEmail);
+        userRepository.save(user);
+        return true;
     }
 }

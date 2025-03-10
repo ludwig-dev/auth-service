@@ -34,7 +34,7 @@ public class UserController {
         if (userService.findByEmail(user.getEmail()).isPresent())
             return new ResponseEntity<>("Email already exits", HttpStatus.BAD_REQUEST);
 
-        if(!EmailValidator.isValid(user.getEmail())){
+        if (!EmailValidator.isValid(user.getEmail())) {
             return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
         }
 
@@ -78,6 +78,33 @@ public class UserController {
             return new ResponseEntity<>("Failed to update username", HttpStatus.INTERNAL_SERVER_ERROR);
 
         return new ResponseEntity<>("Username updated successfully", HttpStatus.OK);
+    }
+
+    @PutMapping("/update/email")
+    public ResponseEntity<String> updateEmail(@RequestHeader("Authorization") String authHeader,
+                                              @RequestBody Map<String, String> requestBody) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+        String newEmail = requestBody.get("newEmail");
+
+        if (newEmail == null || newEmail.trim().isEmpty())
+            return new ResponseEntity<>("Email is empty", HttpStatus.BAD_REQUEST);
+
+        if (!EmailValidator.isValid(newEmail))
+            return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
+
+        if (userService.findByEmail(newEmail).isPresent())
+            return new ResponseEntity<>("Email is taken", HttpStatus.BAD_REQUEST);
+
+        boolean isUpdated = userService.updateEmail(userId, newEmail);
+        if (!isUpdated)
+            return new ResponseEntity<>("Failed to update username", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>("Email updated successfully", HttpStatus.OK);
     }
 }
 

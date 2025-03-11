@@ -37,13 +37,13 @@ public class UserService {
 
     public boolean updateUsername(Long userId, String newUsername) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            user.setUsername(newUsername);
-            userRepository.save(user);
-            return true;
-        }
-        return false;
+        if(userOptional.isEmpty())
+            return false;
+
+        User user = userOptional.get();
+        user.setUsername(newUsername);
+        userRepository.save(user);
+        return true;
     }
 
     public boolean updateEmail(Long userId, String newEmail) {

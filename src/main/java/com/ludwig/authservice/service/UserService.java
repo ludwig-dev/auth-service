@@ -1,5 +1,6 @@
 package com.ludwig.authservice.service;
 
+import com.ludwig.authservice.dto.UserDTO;
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,5 +56,13 @@ public class UserService {
         user.setEmail(newEmail);
         userRepository.save(user);
         return true;
+    }
+
+    public UserDTO getUserInfo(Long userId){
+        Optional<User> userOptional = userRepository.findById(userId);
+        if(userOptional.isEmpty())
+            return null;
+        User user = userOptional.get();
+        return new UserDTO(user.getUsername(),user.getEmail(),user.getRole());
     }
 }

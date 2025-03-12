@@ -29,15 +29,16 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
+
+        if (!EmailValidator.isValid(user.getEmail())) {
+            return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
+        }
+
         if (userService.findByUsername(user.getUsername()).isPresent())
             return new ResponseEntity<>("Username already exists", HttpStatus.BAD_REQUEST);
 
         if (userService.findByEmail(user.getEmail()).isPresent())
             return new ResponseEntity<>("Email already exits", HttpStatus.BAD_REQUEST);
-
-        if (!EmailValidator.isValid(user.getEmail())) {
-            return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
-        }
 
         userService.registerNewUser(user);
         return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
@@ -46,6 +47,10 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> loginUser(@RequestBody User user) {
         Optional<User> foundUser = userService.findByEmail(user.getEmail());
+
+        if (!EmailValidator.isValid(user.getEmail())) {
+            return new ResponseEntity<>(Map.of("error", "Invalid email"), HttpStatus.BAD_REQUEST);
+        }
 
         if (foundUser.isEmpty())
             return new ResponseEntity<>(Map.of("error", "Email not found"), HttpStatus.NOT_FOUND);

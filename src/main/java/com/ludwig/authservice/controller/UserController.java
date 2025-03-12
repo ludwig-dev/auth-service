@@ -1,5 +1,6 @@
 package com.ludwig.authservice.controller;
 
+import com.ludwig.authservice.dto.UserDTO;
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.EmailValidator;
@@ -43,18 +44,19 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody User user) {
+    public ResponseEntity<Map<String, String>> loginUser(@RequestBody User user) {
         Optional<User> foundUser = userService.findByEmail(user.getEmail());
 
         if (foundUser.isEmpty())
-            return new ResponseEntity<>("Email not found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Map.of("error", "Email not found"), HttpStatus.NOT_FOUND);
 
         if (!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword()))
-            return new ResponseEntity<>("Invalid password", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Map.of("error", "Invalid password"), HttpStatus.UNAUTHORIZED);
 
         String token = jwtUtil.generateToken(foundUser.get().getId());
-        return new ResponseEntity<>(token, HttpStatus.OK);
+        return ResponseEntity.ok(Map.of("token", token));
     }
+
 
     @PutMapping("/update/username")
     public ResponseEntity<String> updateUsername(@RequestHeader("Authorization") String authHeader,
@@ -106,5 +108,21 @@ public class UserController {
 
         return new ResponseEntity<>("Email updated successfully", HttpStatus.OK);
     }
+
+    @GetMapping("/get/userinfo")
+    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        UserDTO userDTO = userService.getUserInfo(userId);
+        if(userDTO == null)
+            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+
+        return ResponseEntity.ok(userDTO);
+        }
 }
 

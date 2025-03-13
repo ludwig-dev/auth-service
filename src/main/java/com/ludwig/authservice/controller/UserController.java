@@ -58,7 +58,7 @@ public class UserController {
         if (!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword()))
             return new ResponseEntity<>(Map.of("error", "Invalid password"), HttpStatus.UNAUTHORIZED);
 
-        String token = jwtUtil.generateToken(foundUser.get().getId());
+        String token = jwtUtil.generateToken(foundUser.get().getId(), foundUser.get().getRole());
         return ResponseEntity.ok(Map.of("token", token));
     }
 

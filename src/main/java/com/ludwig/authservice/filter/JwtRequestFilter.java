@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -40,33 +42,32 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Applicatio
 
         Long userId = null;
         String jwt = null;
+        String role = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             userId = jwtUtil.extractUserId(jwt);
+            role = jwtUtil.extractRole(jwt);
         }
 
-        // If userId is valid and no authentication is currently set
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Dynamically fetch UserService at runtime to prevent circular dependency
-            UserService userService = applicationContext.getBean(UserService.class);
-            User user = userService.findById(userId).orElse(null);
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-            if (user != null && jwtUtil.validateToken(jwt, user.getId())) {
-                UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                        user.getUsername(),
-                        user.getPassword(),
-                        List.of(() -> "ROLE_" + user.getRole())  // Assign roles
-                );
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    userId.toString(),
+                    "",
+                    authorities
+            );
 
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
+
         chain.doFilter(request, response);
     }
+
 }

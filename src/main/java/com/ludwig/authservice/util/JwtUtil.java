@@ -31,6 +31,10 @@ public class JwtUtil {
         return Long.parseLong(extractClaim(token, Claims::getSubject));
     }
 
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -48,8 +52,9 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(Long userId) {
+    public String generateToken(Long userId, String role) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
         return createToken(claims, userId.toString());
     }
 

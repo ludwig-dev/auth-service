@@ -1,5 +1,6 @@
 package com.ludwig.authservice.controller;
 
+import com.ludwig.authservice.dto.UserDTO;
 import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,8 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 }

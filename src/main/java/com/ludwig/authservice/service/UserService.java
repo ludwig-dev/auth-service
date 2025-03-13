@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -69,7 +70,10 @@ public class UserService {
         return new UserDTO(user.getUsername(), user.getEmail(), user.getRole());
     }
 
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> new UserDTO(user.getUsername(), user.getEmail(), user.getRole())) // ✅ Convert User to UserDTO
+                .collect(Collectors.toList());
     }
+
 }

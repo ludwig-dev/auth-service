@@ -6,6 +6,7 @@ import com.ludwig.authservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,7 +39,7 @@ public class UserService {
 
     public boolean updateUsername(Long userId, String newUsername) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if(userOptional.isEmpty())
+        if (userOptional.isEmpty())
             return false;
 
         User user = userOptional.get();
@@ -58,11 +59,15 @@ public class UserService {
         return true;
     }
 
-    public UserDTO getUserInfo(Long userId){
+    public UserDTO getUserInfo(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
-        if(userOptional.isEmpty())
+        if (userOptional.isEmpty())
             return null;
         User user = userOptional.get();
-        return new UserDTO(user.getUsername(),user.getEmail(),user.getRole());
+        return new UserDTO(user.getUsername(), user.getEmail(), user.getRole());
+    }
+
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
     }
 }

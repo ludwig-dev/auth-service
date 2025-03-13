@@ -20,11 +20,11 @@ public class UserService {
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsernameIgnoreCase(username.toLowerCase());
     }
 
     public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmailIgnoreCase(email.toLowerCase());
     }
 
     public Optional<User> findById(Long userId) {
@@ -33,6 +33,8 @@ public class UserService {
 
     public User registerNewUser(User user) {
         user.setRole("USER");
+        user.setEmail(user.getEmail().toLowerCase());
+        user.setUsername(user.getUsername().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -43,7 +45,7 @@ public class UserService {
             return false;
 
         User user = userOptional.get();
-        user.setUsername(newUsername);
+        user.setUsername(newUsername.toLowerCase());
         userRepository.save(user);
         return true;
     }
@@ -54,7 +56,7 @@ public class UserService {
             return false;
 
         User user = userOptional.get();
-        user.setEmail(newEmail);
+        user.setEmail(newEmail.toLowerCase());
         userRepository.save(user);
         return true;
     }

@@ -1,6 +1,7 @@
 package com.ludwig.authservice.config;
 
 import com.ludwig.authservice.filter.JwtRequestFilter;
+import com.ludwig.authservice.service.TokenBlacklistService;
 import com.ludwig.authservice.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,14 +18,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public SecurityConfig(JwtUtil jwtUtil) {
+    public SecurityConfig(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
-        return new JwtRequestFilter(jwtUtil);
+        return new JwtRequestFilter(jwtUtil, tokenBlacklistService);
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package com.ludwig.authservice.filter;
 
 import com.ludwig.authservice.model.User;
+import com.ludwig.authservice.service.TokenBlacklistService;
 import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.JwtUtil;
 import jakarta.servlet.FilterChain;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,10 +25,12 @@ import java.util.List;
 public class JwtRequestFilter extends OncePerRequestFilter implements ApplicationContextAware {
 
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
     private static ApplicationContext applicationContext;
 
-    public JwtRequestFilter(JwtUtil jwtUtil) {
+    public JwtRequestFilter(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -46,6 +50,13 @@ public class JwtRequestFilter extends OncePerRequestFilter implements Applicatio
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
+            if (tokenBlacklistService.isBlacklisted(jwt)) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.getWriter().write("Token is invalid");
+                return;
+            }
+
+
             userId = jwtUtil.extractUserId(jwt);
             role = jwtUtil.extractRole(jwt);
         }

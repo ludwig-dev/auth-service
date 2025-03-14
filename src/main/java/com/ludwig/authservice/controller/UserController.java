@@ -2,6 +2,7 @@ package com.ludwig.authservice.controller;
 
 import com.ludwig.authservice.dto.UserDTO;
 import com.ludwig.authservice.model.User;
+import com.ludwig.authservice.service.TokenBlacklistService;
 import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.EmailValidator;
 import com.ludwig.authservice.util.JwtUtil;
@@ -20,11 +21,13 @@ public class UserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final TokenBlacklistService tokenBlacklistService;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @PostMapping("/register")
@@ -60,6 +63,18 @@ public class UserController {
 
         String token = jwtUtil.generateToken(foundUser.get().getId(), foundUser.get().getRole());
         return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logoutUser(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        tokenBlacklistService.addToBlacklist(token);
+
+        return new ResponseEntity<>("Logged out successfully", HttpStatus.OK);
     }
 
 
@@ -124,10 +139,10 @@ public class UserController {
         Long userId = jwtUtil.extractUserId(token);
 
         UserDTO userDTO = userService.getUserInfo(userId);
-        if(userDTO == null)
+        if (userDTO == null)
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
 
         return ResponseEntity.ok(userDTO);
-        }
+    }
 }
 

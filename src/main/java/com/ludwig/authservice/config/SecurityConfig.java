@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configure(http))
                 .csrf(csrf -> csrf.disable())  // Disable CSRF as we are using JWT
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/register", "/api/users/login").permitAll()  // Public access for login & registration
+                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()  // Public access for login & registration
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()  // All other requests require authentication
                 )

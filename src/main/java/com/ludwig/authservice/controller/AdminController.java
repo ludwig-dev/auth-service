@@ -6,11 +6,11 @@ import com.ludwig.authservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -26,6 +26,16 @@ public class AdminController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    @PutMapping("/set-admin")
+    public ResponseEntity<String> setRoleToAdmin(@RequestBody Map<String, Long> requestBody) {
+        Long userId = requestBody.get("id");
+        boolean isUpdated = userService.setUserRole(userId, "ADMIN");
+        if (!isUpdated)
+            return new ResponseEntity<>("Failed to set role to admin", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>("Changed role to ADMIN", HttpStatus.OK);
     }
 }
 

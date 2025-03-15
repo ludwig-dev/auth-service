@@ -76,4 +76,14 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public boolean setUserRole(Long userId, String role) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty())
+            return false;
+        User user = userOptional.get();
+        user.setRole(role);
+        userRepository.save(user);
+        return true;
+    }
+
 }

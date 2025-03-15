@@ -67,12 +67,12 @@ public class UserService {
         if (userOptional.isEmpty())
             return null;
         User user = userOptional.get();
-        return new UserDTO(user.getUsername(), user.getEmail(), user.getRole());
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(user -> new UserDTO(user.getUsername(), user.getEmail(), user.getRole()))
+                .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()))
                 .collect(Collectors.toList());
     }
 

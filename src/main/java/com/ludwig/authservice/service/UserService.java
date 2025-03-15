@@ -32,12 +32,12 @@ public class UserService {
         return userRepository.findById(userId);
     }
 
-    public User registerNewUser(User user) {
+    public void registerNewUser(User user) {
         user.setRole("USER");
         user.setEmail(user.getEmail().toLowerCase());
         user.setUsername(user.getUsername().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     public boolean updateUsername(Long userId, String newUsername) {

@@ -88,5 +88,21 @@ public class UserController {
 
         return ResponseEntity.ok(userDTO);
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        boolean isUpdated = userService.deleteUserById(userId);
+        if (!isUpdated)
+            return new ResponseEntity<>("Failed to delete user", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>("Deleted user with id " + userId, HttpStatus.OK);
+    }
 }
 

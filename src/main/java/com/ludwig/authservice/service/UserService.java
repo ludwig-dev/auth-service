@@ -86,4 +86,13 @@ public class UserService {
         return true;
     }
 
+    public boolean deleteUserById(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty())
+            return false;
+        User user = userOptional.get();
+        userRepository.delete(user);
+        return true;
+    }
+
 }

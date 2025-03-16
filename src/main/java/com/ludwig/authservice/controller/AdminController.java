@@ -1,17 +1,14 @@
 package com.ludwig.authservice.controller;
 
 import com.ludwig.authservice.dto.UserDTO;
-import com.ludwig.authservice.model.User;
 import com.ludwig.authservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import javax.swing.text.rtf.RTFEditorKit;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/admin")

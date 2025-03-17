@@ -79,4 +79,20 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logoutUser(HttpServletResponse response) {
+        // Create an empty cookie with maxAge = 0 to clear it
+        ResponseCookie expiredCookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(0) // Expires immediately
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+
+        return ResponseEntity.ok().build();
+    }
 }

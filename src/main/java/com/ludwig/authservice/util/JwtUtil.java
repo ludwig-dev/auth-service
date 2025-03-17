@@ -22,7 +22,6 @@ public class JwtUtil {
         this.SECRET_KEY = secretKey;
     }
 
-    // Generate a key object from the secret key (more secure)
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
@@ -68,8 +67,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Boolean validateToken(String token, Long userId) {
-        final Long extractedUserId = extractUserId(token);  // Extract user ID from token
-        return (extractedUserId.equals(userId) && !isTokenExpired(token));
+    public Boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

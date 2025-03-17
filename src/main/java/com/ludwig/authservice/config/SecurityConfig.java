@@ -1,7 +1,6 @@
 package com.ludwig.authservice.config;
 
 import com.ludwig.authservice.filter.JwtRequestFilter;
-import com.ludwig.authservice.service.TokenBlacklistService;
 import com.ludwig.authservice.util.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,23 +17,21 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
-    private final TokenBlacklistService tokenBlacklistService;
 
-    public SecurityConfig(JwtUtil jwtUtil, TokenBlacklistService tokenBlacklistService) {
+    public SecurityConfig(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Bean
     public JwtRequestFilter jwtRequestFilter() {
-        return new JwtRequestFilter(jwtUtil, tokenBlacklistService);
+        return new JwtRequestFilter(jwtUtil);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtRequestFilter jwtRequestFilter) throws Exception {
         http
                 .cors(cors -> cors.configure(http))
-                .csrf(csrf -> csrf.disable())  // Disable CSRF as we are using JWT
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()  // Public access for login & registration
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -43,7 +40,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));  // Stateless session
 
-        // Add JWT filter before UsernamePasswordAuthenticationFilter
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

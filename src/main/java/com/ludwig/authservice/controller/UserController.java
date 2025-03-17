@@ -4,9 +4,12 @@ import com.ludwig.authservice.dto.UserDTO;
 import com.ludwig.authservice.service.UserService;
 import com.ludwig.authservice.util.EmailValidator;
 import com.ludwig.authservice.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.Cookie;
 
 import java.util.Map;
 
@@ -23,14 +26,13 @@ public class UserController {
     }
 
     @PutMapping("/update/username")
-    public ResponseEntity<String> updateUsername(@RequestHeader("Authorization") String authHeader,
-                                                 @RequestBody Map<String, String> requestBody) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> updateUsername(@RequestBody Map<String, String> requestBody, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
 
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);  // Extract user ID from token
+        Long userId = Long.parseLong(authentication.getName());
         String newUsername = requestBody.get("newUsername");
 
         if (newUsername == null || newUsername.trim().isEmpty())
@@ -47,14 +49,13 @@ public class UserController {
     }
 
     @PutMapping("/update/email")
-    public ResponseEntity<String> updateEmail(@RequestHeader("Authorization") String authHeader,
-                                              @RequestBody Map<String, String> requestBody) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<String> updateEmail(@RequestBody Map<String, String> requestBody, Authentication authentication) {
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return new ResponseEntity<>("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
 
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
+        Long userId = Long.parseLong(authentication.getName());
         String newEmail = requestBody.get("newEmail");
 
         if (newEmail == null || newEmail.trim().isEmpty())
@@ -74,14 +75,12 @@ public class UserController {
     }
 
     @GetMapping("/get/userinfo")
-    public ResponseEntity<?> getUserInfo(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<?> getUserInfo(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Unauthorized - Invalid Token");
         }
 
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
-
+        Long userId = Long.parseLong(authentication.getName());
         UserDTO userDTO = userService.getUserInfo(userId);
         if (userDTO == null)
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
@@ -90,13 +89,9 @@ public class UserController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return new ResponseEntity<>("Invalid authorization header", HttpStatus.UNAUTHORIZED);
-        }
+    public ResponseEntity<String> deleteUser(Authentication authentication) {
 
-        String token = authHeader.substring(7);
-        Long userId = jwtUtil.extractUserId(token);
+        Long userId = Long.parseLong(authentication.getName());
 
         boolean isUpdated = userService.deleteUserById(userId);
         if (!isUpdated)

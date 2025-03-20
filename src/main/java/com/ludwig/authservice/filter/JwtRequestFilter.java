@@ -5,8 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -22,31 +20,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Arrays;
 
-public class JwtRequestFilter extends OncePerRequestFilter implements ApplicationContextAware {
+public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private static ApplicationContext applicationContext;
 
     public JwtRequestFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext context) {
-        applicationContext = context;
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String jwt = getJwtFromCookies(request); // ✅ Extract token from cookies
+        String jwt = getJwtFromCookies(request);
 
-        if (jwt != null && jwtUtil.validateToken(jwt)) { // ✅ Validate token before extracting data
+        if (jwt != null && jwtUtil.validateToken(jwt)) {
             Long userId = jwtUtil.extractUserId(jwt);
             String role = jwtUtil.extractRole(jwt);
 
-            if (SecurityContextHolder.getContext().getAuthentication() == null) { // ✅ Prevent duplicate authentication
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
                 User userDetails = new User(userId.toString(), "", authorities);

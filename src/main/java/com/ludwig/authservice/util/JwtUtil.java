@@ -1,5 +1,6 @@
 package com.ludwig.authservice.util;
 
+import com.ludwig.authservice.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -51,10 +52,10 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(Long userId, String role) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
-        return createToken(claims, userId.toString());
+        claims.put("role", user.getRole());
+        return createToken(claims, user.getId().toString());
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

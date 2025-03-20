@@ -64,7 +64,7 @@ public class AuthController {
         }
 
         // Generate JWT Token
-        String token = jwtUtil.generateToken(foundUser.get().getId(), foundUser.get().getRole());
+        String token = jwtUtil.generateToken(foundUser.get());
 
         // Create HTTP-Only Secure Cookie
         ResponseCookie jwtCookie = ResponseCookie.from("token", token)
@@ -72,7 +72,7 @@ public class AuthController {
                 .secure(true)         // end only over HTTPS
                 .sameSite("Strict")   // Prevents CSRF attacks
                 .path("/")            // Available for the whole application
-                .maxAge(Duration.ofDays(7)) // ⏳ Expires after 7 days
+                .maxAge(Duration.ofDays(7)) // Expires after 7 days
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());

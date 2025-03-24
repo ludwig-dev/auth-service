@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,16 @@ public class AdminController {
             return new ResponseEntity<>("Failed to set role to user", HttpStatus.INTERNAL_SERVER_ERROR);
 
         return new ResponseEntity<>("Changed role to user", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<String> deleteUser(@RequestBody Map<String, Long> requestBody) {
+        Long userId = requestBody.get("id");
+        boolean isUpdated = userService.deleteUserById(userId);
+        if (!isUpdated)
+            return new ResponseEntity<>("Failed to delete user", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        return new ResponseEntity<>("Deleted user with id: " + userId, HttpStatus.OK);
     }
 
 }

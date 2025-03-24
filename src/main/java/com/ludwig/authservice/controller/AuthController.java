@@ -48,19 +48,20 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<Void> loginUser(@RequestBody User user, HttpServletResponse response) {
-        Optional<User> foundUser = userService.findByEmail(user.getEmail());
+    public ResponseEntity<?> loginUser(@RequestBody User user, HttpServletResponse response) {
 
         if (!EmailValidator.isValid(user.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return new ResponseEntity<>("Invalid email format", HttpStatus.BAD_REQUEST);
         }
 
+        Optional<User> foundUser = userService.findByEmail(user.getEmail());
+
         if (foundUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.NOT_FOUND);
         }
 
         if (!passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.NOT_FOUND);
         }
 
         // Generate JWT Token

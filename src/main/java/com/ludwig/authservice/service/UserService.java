@@ -28,10 +28,6 @@ public class UserService {
         return userRepository.findByEmailIgnoreCase(email.toLowerCase());
     }
 
-    public Optional<User> findById(Long userId) {
-        return userRepository.findById(userId);
-    }
-
     public void registerNewUser(User user) {
         user.setRole("USER");
         user.setEmail(user.getEmail().toLowerCase());
@@ -67,12 +63,12 @@ public class UserService {
         if (userOptional.isEmpty())
             return null;
         User user = userOptional.get();
-        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
+        return convertToDTO(user);
     }
 
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(user -> new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()))
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
@@ -93,6 +89,17 @@ public class UserService {
         User user = userOptional.get();
         userRepository.delete(user);
         return true;
+    }
+
+    public List<UserDTO> searchByUsername(String username) {
+        List<User> userList = userRepository.findByUsernameContainingIgnoreCase(username);
+        return userList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private UserDTO convertToDTO(User user) {
+        return new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
     }
 
 }

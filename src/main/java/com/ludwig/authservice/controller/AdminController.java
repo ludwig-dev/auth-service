@@ -57,5 +57,11 @@ public class AdminController {
         return new ResponseEntity<>("Deleted user with id: " + userId, HttpStatus.OK);
     }
 
+    @GetMapping("/search/username")
+    public ResponseEntity<List<UserDTO>> searchByUsername(@RequestParam("username") String username) {
+        List<UserDTO> users = userService.searchByUsername(username);
+        return ResponseEntity.ok(users);
+    }
+
 }
 

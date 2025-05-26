@@ -1,6 +1,5 @@
-package com.ludwig.authservice.filter;
+package com.ludwig.authservice.auth;
 
-import com.ludwig.authservice.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

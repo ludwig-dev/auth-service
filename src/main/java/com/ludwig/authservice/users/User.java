@@ -1,4 +1,4 @@
-package com.ludwig.authservice.model;
+package com.ludwig.authservice.users;
 
 import lombok.Getter;
 import lombok.Setter;

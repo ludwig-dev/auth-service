@@ -1,6 +1,6 @@
-package com.ludwig.authservice.util;
+package com.ludwig.authservice.auth;
 
-import com.ludwig.authservice.model.User;
+import com.ludwig.authservice.users.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 
 @Component
 public class JwtUtil {

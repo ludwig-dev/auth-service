@@ -1,6 +1,5 @@
-package com.ludwig.authservice.repository;
+package com.ludwig.authservice.users;
 
-import com.ludwig.authservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

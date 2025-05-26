@@ -1,7 +1,7 @@
 package com.ludwig.authservice.config;
 
-import com.ludwig.authservice.filter.JwtRequestFilter;
-import com.ludwig.authservice.util.JwtUtil;
+import com.ludwig.authservice.auth.JwtRequestFilter;
+import com.ludwig.authservice.auth.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
